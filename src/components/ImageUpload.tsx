@@ -155,8 +155,11 @@ export default function ImageUpload({ onImageSelect, disabled = false }: ImageUp
               </svg>
             </div>
             <p className="text-lg font-medium text-gray-900 mb-2">上传孩子的照片</p>
-            <p className="text-sm text-gray-600 mb-4">
+            <p className="text-sm text-gray-600 mb-2">
               拖拽图片到此处，或点击选择文件
+            </p>
+            <p className="text-xs text-orange-600 mb-2">
+              💡 建议使用五官清晰、光线良好的正面照片
             </p>
             <p className="text-xs text-gray-500">
               支持JPG、PNG格式，最大5MB

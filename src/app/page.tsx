@@ -7,6 +7,7 @@ import ResultDisplay from '@/components/ResultDisplay';
 import QuotaExceeded from '@/components/QuotaExceeded';
 import { createCompositeImage } from '@/lib/imageComposer';
 import { hasQuotaAvailable, getRemainingQuota, cleanupExpiredQuota, consumeQuota } from '@/lib/quota';
+import { processWithNanobanana, createNanobananaPrompt } from '@/lib/nanobanana';
 
 export default function Home() {
   const [selectedImage, setSelectedImage] = useState<string>('');
@@ -64,32 +65,28 @@ export default function Home() {
     setError('');
 
     try {
-      // 模拟处理延迟，提供真实的体验
-      await new Promise(resolve => setTimeout(resolve, 2000));
+      console.log('开始使用nanobanana专业提示词处理图片:', {
+        styleType,
+        prompt: createNanobananaPrompt(styleType)
+      });
       
-      // 使用本地图像合成功能创建演示效果
-      const compositeImage = await createCompositeImage(imageData, styleType);
+      // 调用nanobanana专业AI处理
+      const nanobananaResult = await processWithNanobanana(
+        imageData, 
+        `/templates/${styleType === 'flag' ? 'flag-example.jpg' : 'nostalgic-example.jpg'}`, 
+        styleType
+      );
       
-      // 调用Gemini API获取描述文本（可选）
-      try {
-        const response = await fetch('/api/process-image', {
-          method: 'POST',
-          headers: {
-            'Content-Type': 'application/json',
-          },
-          body: JSON.stringify({
-            imageData: imageData,
-            styleType: styleType,
-          }),
-        });
+      if (nanobananaResult.success && nanobananaResult.data) {
+        console.log('nanobanana处理成功');
+        setResultImage(nanobananaResult.data.processedImageUrl);
+      } else {
+        console.warn('nanobanana处理失败，使用本地合成作为备选:', nanobananaResult.error);
         
-        const data = await response.json();
-        console.log('Gemini API返回:', data.description);
-      } catch (apiError) {
-        console.warn('Gemini API调用失败，但不影响图像生成:', apiError);
+        // 备选方案：使用本地图像合成
+        const compositeImage = await createCompositeImage(imageData, styleType);
+        setResultImage(compositeImage);
       }
-      
-      setResultImage(compositeImage);
       
       // 更新剩余额度显示
       setRemainingQuota(getRemainingQuota());
@@ -156,7 +153,10 @@ export default function Home() {
         
         {/* 上传区域 */}
         <div>
-          <h2 className="text-lg font-semibold text-gray-800 mb-3">上传图片</h2>
+          <h2 className="text-lg font-semibold text-gray-800 mb-1">上传图片</h2>
+          <p className="text-xs text-orange-600 mb-3">
+            💡 建议使用五官清晰、光线良好的正面照片
+          </p>
           <ImageUpload 
             onImageSelect={handleImageSelect}
             disabled={isProcessing || quotaExceeded}
