@@ -71,10 +71,10 @@ export default function StyleSelector({
         ))}
       </div>
       
-      {selectedStyle && !disabled && (
-        <div className="mt-4 p-3 bg-green-50 rounded-lg border border-green-200">
-          <p className="text-green-800 text-sm text-center">
-            ✨ 已选择: {STYLE_TEMPLATES.find(t => t.id === selectedStyle)?.name}，正在生成...
+      {selectedStyle && (
+        <div className="mt-4 p-3 bg-blue-50 rounded-lg border border-blue-200">
+          <p className="text-blue-800 text-sm text-center">
+            ✨ 已选择: {STYLE_TEMPLATES.find(t => t.id === selectedStyle)?.name}
           </p>
         </div>
       )}
