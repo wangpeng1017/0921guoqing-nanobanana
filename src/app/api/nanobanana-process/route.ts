@@ -1,5 +1,7 @@
 import { NextRequest, NextResponse } from 'next/server';
 import { put } from '@vercel/blob';
+import { processImageWithGemini } from '@/lib/gemini';
+import { createCompositeImage } from '@/lib/imageComposer';
 
 // nanobanana API配置
 const NANOBANANA_API_KEY = process.env.NANOBANANA_API_KEY;
@@ -19,8 +21,9 @@ export async function POST(request: NextRequest) {
   try {
     console.log('nanobanana API处理开始...');
 
-    if (!NANOBANANA_API_KEY) {
-      throw new Error('nanobanana API key not configured');
+    if (!NANOBANANA_API_KEY || NANOBANANA_API_KEY === 'your_real_nanobanana_api_key_here') {
+      console.log('⚠️  nanobanana API key 未配置，使用Gemini+本地合成方案');
+      return await fallbackToGeminiComposite(request);
     }
 
     const formData = await request.formData();
@@ -90,9 +93,66 @@ export async function POST(request: NextRequest) {
 
   } catch (error) {
     console.error('nanobanana处理错误:', error);
+    
+    // 如果nanobanana API失败，尝试回退方案
+    console.log('尝试使用Gemini+本地合成回退方案...');
+    try {
+      return await fallbackToGeminiComposite(request);
+    } catch (fallbackError) {
+      console.error('回退方案也失败:', fallbackError);
+      return NextResponse.json({
+        success: false,
+        error: error instanceof Error ? error.message : '图像处理失败'
+      }, { status: 500 });
+    }
+  }
+}
+
+// 回退方案：使用Gemini分析 + 本地图像合成
+async function fallbackToGeminiComposite(request: NextRequest) {
+  try {
+    console.log('使用Gemini+本地合成方案...');
+    
+    const formData = await request.formData();
+    const image = formData.get('image') as File;
+    const style = formData.get('style') as string;
+    
+    if (!image || !style) {
+      return NextResponse.json({ error: '缺少必要参数' }, { status: 400 });
+    }
+    
+    // 上传图像到Vercel Blob
+    const imageArrayBuffer = await image.arrayBuffer();
+    const imageBlob = await put(`uploads/${Date.now()}-${image.name}`, imageArrayBuffer, {
+      access: 'public',
+    });
+    
+    // 转换为base64用于Gemini分析
+    const imageBase64 = `data:image/jpeg;base64,${Buffer.from(imageArrayBuffer).toString('base64')}`;
+    
+    // 使用Gemini分析图像
+    const prompt = getPromptForStyle(style);
+    const geminiResult = await processImageWithGemini(imageBase64, style);
+    
+    // 创建本地合成图像
+    const compositeImage = await createCompositeImage(imageBase64, style);
+    
+    return NextResponse.json({
+      success: true,
+      data: {
+        originalImage: imageBlob.url,
+        processedImage: compositeImage,
+        styleUsed: style,
+        method: 'gemini_local_composite',
+        geminiAnalysis: geminiResult.success ? geminiResult.data?.description : null
+      }
+    });
+    
+  } catch (error) {
+    console.error('回退方案错误:', error);
     return NextResponse.json({
       success: false,
-      error: error instanceof Error ? error.message : '未知错误'
+      error: error instanceof Error ? error.message : '处理失败'
     }, { status: 500 });
   }
 }

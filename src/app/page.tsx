@@ -6,6 +6,7 @@ import StyleSelector from '@/components/StyleSelector';
 import ResultDisplay from '@/components/ResultDisplay';
 import QuotaExceeded from '@/components/QuotaExceeded';
 import { hasQuotaAvailable, getRemainingQuota, cleanupExpiredQuota, consumeQuota } from '@/lib/quota';
+import { createCompositeImage } from '@/lib/imageComposer';
 
 export default function Home() {
   const [selectedImage, setSelectedImage] = useState<string>('');
