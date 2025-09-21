@@ -5,14 +5,7 @@ const getApiKeys = (): string[] => {
   const keys = [
     process.env.GEMINI_API_KEY_1,
     process.env.GEMINI_API_KEY_2,
-    process.env.GEMINI_API_KEY_3,
-    process.env.GEMINI_API_KEY_4,
-    process.env.GEMINI_API_KEY_5,
-    process.env.GEMINI_API_KEY_6,
-    process.env.GEMINI_API_KEY_7,
-    process.env.GEMINI_API_KEY_8,
-    process.env.GEMINI_API_KEY_9,
-    process.env.GEMINI_API_KEY_10
+    process.env.GEMINI_API_KEY_3
   ].filter(Boolean) as string[];
   
   // 如果没有配置多个密钥，回退到单个密钥

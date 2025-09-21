@@ -4,23 +4,16 @@
 
 ### 在Vercel Dashboard中配置以下环境变量：
 
-#### 1. Google Gemini API 密钥池（10个密钥）
+#### 1. Google Gemini API 密钥池（3个密钥）
 ```bash
-GEMINI_API_KEY_1=AIzaSyDADL0htCYzVez7EnpEvVmFp0N-BOKlSSQ
-GEMINI_API_KEY_2=AIzaSyDtVqH7hfy0nuFEYvxrGB4G6nWzc3VESro
-GEMINI_API_KEY_3=AIzaSyCGeuYHOenL85HV6vEzk418DW8dRHj7Wps
-GEMINI_API_KEY_4=AIzaSyCUF-0n9w5Jhk0yibHtNyLi47bib8uJ4EI
-GEMINI_API_KEY_5=AIzaSyCQ-pqpmyRFNkDA826BvsPynJWYxIckQGQ
-GEMINI_API_KEY_6=AIzaSyBrQVbxYG9lxcbd78nt3SSfRwyArBZqUwk
-GEMINI_API_KEY_7=AIzaSyBQmH79fV-vp8S9ePFVXPEk3iv5P0wYX2w
-GEMINI_API_KEY_8=AIzaSyCDnopwcVoTZrGwEI3KNLCLJMBlol2Rv-o
-GEMINI_API_KEY_9=AIzaSyAJfFNbReZ4VAH4HG3ZBXWulDQlqgCkAkw
-GEMINI_API_KEY_10=AIzaSyCSCclxMKdQWroYER0f3vkVY4ywzRebAJU
+GEMINI_API_KEY_1=AIzaSyAgiBd_CtyPJ4p_4A_PtDhC6RQq8m5Qvuk
+GEMINI_API_KEY_2=AIzaSyBtw7WLw0Lf749k0j5yeKJpjz1AfWgDsuA
+GEMINI_API_KEY_3=AIzaSyACaQWzNKYvYUvAFNkL4lxWtrcevqNZZ8A
 ```
 
 #### 2. 兼容性密钥（可选）
 ```bash
-GEMINI_API_KEY=AIzaSyDADL0htCYzVez7EnpEvVmFp0N-BOKlSSQ
+GEMINI_API_KEY=AIzaSyAgiBd_CtyPJ4p_4A_PtDhC6RQq8m5Qvuk
 ```
 
 #### 3. Vercel Blob存储
@@ -91,7 +84,7 @@ NEXT_PUBLIC_MAX_FILE_SIZE=5242880
 
 ## 🎯 优势特点
 
-- ✅ **10个API密钥池** - 大幅提升可用性
+- ✅ **3个 API密钥池** - 提升可用性
 - ✅ **智能故障转移** - 自动切换失效密钥
 - ✅ **状态监控** - 实时查看密钥状态
 - ✅ **错误重试** - 3次重试机制

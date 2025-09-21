@@ -1,22 +1,15 @@
 const { GoogleGenerativeAI } = require('@google/generative-ai');
 
-// 您提供的API密钥列表
+// 您提供的API密钥列表（更新为新的3个密钥）
 const apiKeys = [
-  'AIzaSyDADL0htCYzVez7EnpEvVmFp0N-BOKlSSQ',
-  'AIzaSyDtVqH7hfy0nuFEYvxrGB4G6nWzc3VESro',
-  'AIzaSyCGeuYHOenL85HV6vEzk418DW8dRHj7Wps',
-  'AIzaSyCUF-0n9w5Jhk0yibHtNyLi47bib8uJ4EI',
-  'AIzaSyCQ-pqpmyRFNkDA826BvsPynJWYxIckQGQ',
-  'AIzaSyBrQVbxYG9lxcbd78nt3SSfRwyArBZqUwk',
-  'AIzaSyBQmH79fV-vp8S9ePFVXPEk3iv5P0wYX2w',
-  'AIzaSyCDnopwcVoTZrGwEI3KNLCLJMBlol2Rv-o',
-  'AIzaSyAJfFNbReZ4VAH4HG3ZBXWulDQlqgCkAkw',
-  'AIzaSyCSCclxMKdQWroYER0f3vkVY4ywzRebAJU'
+  'AIzaSyAgiBd_CtyPJ4p_4A_PtDhC6RQq8m5Qvuk',
+  'AIzaSyBtw7WLw0Lf749k0j5yeKJpjz1AfWgDsuA',
+  'AIzaSyACaQWzNKYvYUvAFNkL4lxWtrcevqNZZ8A'
 ];
 
 async function testApiKey(apiKey, index) {
   try {
-    console.log(`\n🔑 测试密钥 ${index + 1}/10: ${apiKey.substr(0, 10)}...${apiKey.substr(-4)}`);
+    console.log(`\n🔑 测试密钥 ${index + 1}/3: ${apiKey.substr(0, 10)}...${apiKey.substr(-4)}`);
     
     const genAI = new GoogleGenerativeAI(apiKey);
     const model = genAI.getGenerativeModel({ model: 'gemini-1.5-flash' });
