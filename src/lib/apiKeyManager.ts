@@ -109,12 +109,15 @@ class ApiKeyManager {
     keyStatus.failCount++;
     keyStatus.lastFailTime = Date.now();
 
-    console.log(`❌ 密钥失败: ${failedKey.substr(0, 10)}...${failedKey.substr(-4)}, 失败次数: ${keyStatus.failCount}`);
+    // 检查错误类型
+    const errorType = this.getErrorType(error);
+    console.log(`❌ 密钥失败: ${failedKey.substr(0, 10)}...${failedKey.substr(-4)}, 失败次数: ${keyStatus.failCount}, 错误类型: ${errorType}`);
     
     // 检查是否需要阻塞该密钥
     if (this.shouldBlockKey(error) || keyStatus.failCount >= this.maxFailCount) {
       keyStatus.isBlocked = true;
-      console.log(`🚫 密钥被阻塞: ${failedKey.substr(0, 10)}...${failedKey.substr(-4)}`);
+      const blockReason = this.shouldBlockKey(error) ? '严重错误' : '达到最大失败次数';
+      console.log(`🚫 密钥被阻塞: ${failedKey.substr(0, 10)}...${failedKey.substr(-4)} (原因: ${blockReason})`);
       
       // 切换到下一个密钥
       this.rotateToNextKey();
@@ -129,6 +132,20 @@ class ApiKeyManager {
       keyStatus.isBlocked = false;
       delete keyStatus.lastFailTime;
     }
+  }
+
+  // 获取错误类型
+  private getErrorType(error: Error): string {
+    const errorMessage = error.message.toLowerCase();
+    
+    if (errorMessage.includes('quota exceeded')) return '配额耗尽';
+    if (errorMessage.includes('rate limit') || errorMessage.includes('429')) return '频率限制';
+    if (errorMessage.includes('api key not valid')) return '密钥无效';
+    if (errorMessage.includes('permission denied')) return '权限拒绝';
+    if (errorMessage.includes('resource_exhausted')) return '资源耗尽';
+    if (errorMessage.includes('network') || errorMessage.includes('timeout')) return '网络错误';
+    
+    return '未知错误';
   }
 
   // 判断是否应该阻塞密钥

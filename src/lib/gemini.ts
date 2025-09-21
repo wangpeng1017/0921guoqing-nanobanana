@@ -1,4 +1,5 @@
 import { apiKeyManager } from './apiKeyManager';
+import { getUserMessage } from './errorHandler';
 
 // 处理图像融合的提示词模板
 export const createImageFusionPrompt = (styleType: string) => {
@@ -83,8 +84,11 @@ export async function processImageWithGemini(imageData: string, styleType: strin
   console.error('❗ 所有重试尝试都失败');
   console.log('📊 密钥池状态:', apiKeyManager.getKeyPoolStatus());
   
+  // 返回用户友好的错误消息
+  const userFriendlyMessage = lastError ? getUserMessage(lastError) : '服务暂时不可用，请稍后重试';
+  
   return {
     success: false,
-    error: lastError?.message || '所有API密钥都不可用'
+    error: userFriendlyMessage
   };
 }
