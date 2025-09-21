@@ -12,9 +12,9 @@ export const createImageFusionPrompt = (styleType: string) => {
   return prompts[styleType as keyof typeof prompts] || prompts.flag;
 };
 
-// Gemini 2.5 Flash Image Preview图像处理函数（使用密钥轮询）
+// Gemini 2.5 Flash Image Preview图像处理函数（优化调用频率）
 export async function processImageWithGemini(imageData: string, styleType: string) {
-  const maxRetries = 3;
+  const maxRetries = 2; // 减少重试次数
   let lastError: Error | null = null;
   
   for (let attempt = 1; attempt <= maxRetries; attempt++) {
@@ -26,7 +26,7 @@ export async function processImageWithGemini(imageData: string, styleType: strin
       // 获取当前可用的API密钥和模型
       currentApiKey = apiKeyManager.getCurrentApiKey();
       if (!currentApiKey) {
-        throw new Error('没有可用的API密钥');
+        throw new Error('暂无可用的API密钥，请稍后重试');
       }
       
       // 只使用Gemini 2.5 Flash Image Preview模型
@@ -80,10 +80,11 @@ export async function processImageWithGemini(imageData: string, styleType: strin
         apiKeyManager.markKeyFailed(currentApiKey, lastError);
       }
       
-      // 如果还有重试机会，等待一秒后重试
+      // 如果还有重试机会，增加更长的等待时间
       if (attempt < maxRetries) {
-        console.log(`⏳ 等待${attempt}秒后重试...`);
-        await new Promise(resolve => setTimeout(resolve, attempt * 1000));
+        const waitTime = attempt === 1 ? 15 : 45; // 15秒或45秒
+        console.log(`⏳ 等待${waitTime}秒后重试（Gemini 2.5预览模型限制较严格）...`);
+        await new Promise(resolve => setTimeout(resolve, waitTime * 1000));
       }
     }
   }

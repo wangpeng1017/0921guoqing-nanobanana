@@ -27,8 +27,8 @@ interface KeyStatus {
 class ApiKeyManager {
   private keyPool: KeyStatus[] = [];
   private currentIndex: number = 0;
-  private readonly maxFailCount = 3; // 最大失败次数
-  private readonly blockDuration = 5 * 60 * 1000; // 5分钟冷却时间
+  private readonly maxFailCount = 2; // 减少最大失败次数
+  private readonly blockDuration = 15 * 60 * 1000; // 15分钟冷却时间（Gemini 2.5预览模型限制严格）
 
   constructor() {
     this.initializeKeyPool();

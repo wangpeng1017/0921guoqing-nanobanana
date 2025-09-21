@@ -6,7 +6,7 @@ import StyleSelector from '@/components/StyleSelector';
 import ResultDisplay from '@/components/ResultDisplay';
 import QuotaExceeded from '@/components/QuotaExceeded';
 import ErrorDisplay from '@/components/ErrorDisplay';
-import { hasQuotaAvailable, getRemainingQuota, cleanupExpiredQuota, consumeQuota } from '@/lib/quota';
+import { hasQuotaAvailable, getRemainingQuota, cleanupExpiredQuota, consumeQuota, getNextRequestTime } from '@/lib/quota';
 import { createCompositeImage } from '@/lib/imageComposer';
 
 export default function Home() {
@@ -17,6 +17,7 @@ export default function Home() {
   const [error, setError] = useState<string>('');
   const [quotaExceeded, setQuotaExceeded] = useState(false);
   const [remainingQuota, setRemainingQuota] = useState(0);
+  const [nextRequestTime, setNextRequestTime] = useState<number | null>(null);
 
   // 初始化和清理过期额度数据
   useEffect(() => {
@@ -44,9 +45,15 @@ export default function Home() {
       return;
     }
     
-    // 检查额度
+    // 检查额度和频率限制
     if (!hasQuotaAvailable()) {
-      setQuotaExceeded(true);
+      const nextTime = getNextRequestTime();
+      if (nextTime) {
+        const waitMinutes = Math.ceil((nextTime - Date.now()) / 60000);
+        setError(`请求过于频繁，请等待${waitMinutes}分钟后重试`);
+      } else {
+        setQuotaExceeded(true);
+      }
       return;
     }
     
@@ -100,6 +107,7 @@ export default function Home() {
       
       // 更新剩余额度显示
       setRemainingQuota(getRemainingQuota());
+      setNextRequestTime(getNextRequestTime());
       
     } catch (error) {
       console.error('处理错误:', error);
@@ -118,6 +126,7 @@ export default function Home() {
     setError('');
     setQuotaExceeded(false);
     setRemainingQuota(getRemainingQuota());
+    setNextRequestTime(getNextRequestTime());
   };
 
   return (
@@ -139,7 +148,7 @@ export default function Home() {
             ? 'bg-yellow-100 text-yellow-700' 
             : 'bg-red-100 text-red-700'
         }`}>
-          💎 今日免费额度：{remainingQuota}/10
+          📎 今日免费额度：{remainingQuota}/5
         </div>
       </div>
 
