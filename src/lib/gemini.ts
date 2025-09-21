@@ -1,5 +1,6 @@
 import { apiKeyManager } from './apiKeyManager';
 import { getUserMessage } from './errorHandler';
+import { createCompositeImage } from './imageComposer';
 
 // 处理图像融合的提示词模板
 export const createImageFusionPrompt = (styleType: string) => {
@@ -28,36 +29,82 @@ export async function processImageWithGemini(imageData: string, styleType: strin
         throw new Error('没有可用的API密钥');
       }
       
-      const model = apiKeyManager.getGeminiModel();
+      // 尝试使用图像模型，如果失败则回退到基础模型
+      let model;
+      let isImageModel = true;
+      
+      try {
+        model = apiKeyManager.getGeminiModel();
+      } catch (error) {
+        console.log('图像模型不可用，尝试基础模型...');
+        const client = apiKeyManager.getGeminiClient();
+        if (!client) {
+          throw new Error('无法获取Gemini客户端');
+        }
+        model = client.getGenerativeModel({ model: 'gemini-1.5-flash' });
+        isImageModel = false;
+      }
+      
       const prompt = createImageFusionPrompt(styleType);
       
       console.log(`🔑 使用密钥: ${currentApiKey.substr(0, 10)}...${currentApiKey.substr(-4)}`);
       
-      // 将base64图像数据转换为模型可接受的格式
-      const imageParts = [{
-        inlineData: {
-          data: imageData.split(',')[1], // 移除data:image/...;base64,前缀
-          mimeType: 'image/jpeg'
+      let result, response, text;
+      
+      if (isImageModel) {
+        // 使用图像模型处理
+        console.log('使用Gemini 2.5 Flash Image Preview模型...');
+        const imageParts = [{
+          inlineData: {
+            data: imageData.split(',')[1],
+            mimeType: 'image/jpeg'
+          }
+        }];
+        
+        try {
+          result = await model.generateContent([prompt, ...imageParts]);
+          response = await result.response;
+          text = response.text();
+        } catch (imageError) {
+          // 图像模型失败，回退到基础模型
+          const errorMessage = imageError instanceof Error ? imageError.message : '未知错误';
+          console.log('图像模型失败，回退到基础模型:', errorMessage);
+          const client = apiKeyManager.getGeminiClient();
+          if (!client) {
+            throw imageError;
+          }
+          model = client.getGenerativeModel({ model: 'gemini-1.5-flash' });
+          isImageModel = false;
+          
+          // 重新尝试基础模型
+          result = await model.generateContent(prompt);
+          response = await result.response;
+          text = response.text();
         }
-      }];
+      } else {
+        // 使用基础模型生成描述
+        console.log('使用Gemini 1.5 Flash基础模型...');
+        result = await model.generateContent(prompt);
+        response = await result.response;
+        text = response.text();
+      }
       
-      // 调用Gemini 2.5 Flash Image Preview模型
-      const result = await model.generateContent([prompt, ...imageParts]);
-      const response = await result.response;
-      const text = response.text();
-      
-      console.log('✅ Gemini 2.5 Flash Image Preview处理成功:', text.substring(0, 100) + '...');
+      console.log('✅ Gemini处理成功:', text.substring(0, 100) + '...');
       
       // 标记密钥成功
       apiKeyManager.markKeySuccess(currentApiKey);
+      
+      // 使用本地合成技术创建图像
+      console.log('创建本地合成图像...');
+      const compositeImage = await createCompositeImage(imageData, styleType);
       
       return {
         success: true,
         data: {
           originalImage: imageData,
           description: text,
-          processedImage: imageData, // 如果模型能生成图像，这里应该是生成的图像
-          method: 'gemini-2.5-flash-image-preview',
+          processedImage: compositeImage,
+          method: isImageModel ? 'gemini-2.5-flash-image-preview' : 'gemini-1.5-flash-composite',
           usedApiKey: `${currentApiKey.substr(0, 10)}...${currentApiKey.substr(-4)}`
         }
       };

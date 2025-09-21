@@ -2,8 +2,8 @@ import { NextRequest, NextResponse } from 'next/server';
 import { put } from '@vercel/blob';
 import { processImageWithGemini } from '@/lib/gemini';
 
-// 使用Gemini 2.5 Flash Image Preview模型（即nanobanana模型）
-const GEMINI_API_KEY = process.env.GEMINI_API_KEY;
+// 使用API密钥管理器（自动轮询多个密钥）
+// 不需要在这里手动检查密钥，由apiKeyManager负责
 
 // 专业提示词配置 - 与您提供的精准换脸要求一致
 const getPromptForStyle = (styleType: string) => {
@@ -18,10 +18,8 @@ const getPromptForStyle = (styleType: string) => {
 export async function POST(request: NextRequest) {
   try {
     console.log('Gemini 2.5 Flash Image Preview (nanobanana)模型处理开始...');
-
-    if (!GEMINI_API_KEY) {
-      throw new Error('Gemini API key not configured');
-    }
+    
+    // API密钥由apiKeyManager自动管理，不需要手动检查
 
     const formData = await request.formData();
     const image = formData.get('image') as File;
