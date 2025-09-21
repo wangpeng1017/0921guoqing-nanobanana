@@ -3,7 +3,7 @@ import { GoogleGenerativeAI } from '@google/generative-ai';
 // 初始化Gemini客户端
 const genAI = new GoogleGenerativeAI(process.env.GEMINI_API_KEY!);
 
-// 获取Gemini 2.5 Flash Image Preview模型
+// 获取Gemini 2.5 Flash Image Preview模型（即nanobanana模型）
 export const getGeminiModel = () => {
   return genAI.getGenerativeModel({ 
     model: 'gemini-2.5-flash-image-preview'
@@ -20,11 +20,13 @@ export const createImageFusionPrompt = (styleType: string) => {
   return prompts[styleType as keyof typeof prompts] || prompts.flag;
 };
 
-// 图像处理函数
+// Gemini 2.5 Flash Image Preview图像处理函数（nanobanana模型）
 export async function processImageWithGemini(imageData: string, styleType: string) {
   try {
     const model = getGeminiModel();
     const prompt = createImageFusionPrompt(styleType);
+    
+    console.log('使用Gemini 2.5 Flash Image Preview进行图像处理...');
     
     // 将base64图像数据转换为模型可接受的格式
     const imageParts = [{
@@ -34,26 +36,28 @@ export async function processImageWithGemini(imageData: string, styleType: strin
       }
     }];
     
+    // 调用Gemini 2.5 Flash Image Preview模型
     const result = await model.generateContent([prompt, ...imageParts]);
     const response = await result.response;
     const text = response.text();
     
-    // 注意：Gemini 2.5 Flash Image Preview模型目前返回的是文本描述，不是实际图像
-    // 在实际项目中，您可能需要：
-    // 1. 使用其他图像生成API（如DALL-E、Midjourney等）
-    // 2. 或者显示生成的文本描述，并提供相应的占位图像
+    console.log('Gemini 2.5 Flash Image Preview响应:', text);
     
-    // 临时方案：返回原图像和生成的描述文本
+    // 注意：如果Gemini 2.5 Flash Image Preview实际上可以生成图像，
+    // 那么这里应该返回生成的图像数据
+    // 目前作为测试，返回文本描述和原图像
+    
     return {
       success: true,
       data: {
         originalImage: imageData,
         description: text,
-        processedImage: imageData // 临时返回原图像
+        processedImage: imageData, // 如果模型能生成图像，这里应该是生成的图像
+        method: 'gemini-2.5-flash-image-preview'
       }
     };
   } catch (error) {
-    console.error('Gemini API调用失败:', error);
+    console.error('Gemini 2.5 Flash Image Preview API调用失败:', error);
     return {
       success: false,
       error: error instanceof Error ? error.message : '未知错误'
