@@ -13,11 +13,8 @@ export const getGeminiModel = () => {
 // 处理图像融合的提示词模板
 export const createImageFusionPrompt = (styleType: string) => {
   const prompts = {
-    flag: `请将这张儿童照片中的孩子的面部表情和特征，自然地融合到一个红旗飘扬的爱国主题场景中。保持孩子的面部表情和特征，但要让整体画面看起来自然和谐。背景应该包含鲜艳的红旗和庄严的氛围。`,
-    seaside: `请将这张儿童照片中的孩子的面部表情和特征，自然地融合到一个美丽的海边场景中。保持孩子的面部表情和特征，背景应该是蓝色的大海、沙滩和海浪，营造出快乐的海边度假氛围。`,
-    forest: `请将这张儿童照片中的孩子的面部表情和特征，自然地融合到一个绿意盎然的森林场景中。保持孩子的面部表情和特征，背景应该是茂密的树林、阳光透过树叶的美景，营造出探险和自然的氛围。`,
-    playground: `请将这张儿童照片中的孩子的面部表情和特征，自然地融合到一个色彩缤纷的游乐场场景中。保持孩子的面部表情和特征，背景应该包含滑梯、秋千等游乐设施，营造出快乐玩耍的氛围。`,
-    space: `请将这张儿童照片中的孩子的面部表情和特征，自然地融合到一个神奇的太空场景中。保持孩子的面部表情和特征，背景应该包含星空、星球和宇宙飞船，营造出太空探险的梦幻氛围。`
+    flag: `Precise face swap. Please perfectly replace the girl's face in the reference image with the face from my uploaded child's photo. Requirements: 1. Completely preserve the red background, the text "我和我的祖国" at the top, the red tracksuit, the red scarf, the bamboo stool, and the flag sticker on the hand from the reference image. 2. Match the pigtail hairstyle and red blush makeup from the reference image for my child's head. 3. Core requirement: Ensure 100% similarity of my child's facial features and appearance, with no uncharacteristic changes. The overall style should be a high-definition, festive, patriotic-themed children's portrait.`,
+    nostalgic: `Precise face swap. Please perfectly replace the girl's face in the reference image with the face from my uploaded child's photo. Requirements: 1. Completely preserve the composition, warm retro color tone, beige background wall, the painting on the wall, and the golden text "亲亲我的祖国" in the top left corner from the reference image. 2. Completely preserve the attire from the reference image, including the white shirt, orange-red scarf, red shorts, and the army-green canvas messenger bag. 3. Completely preserve the pose of the girl holding the five-star red flag and the globe in the foreground. 4. Match the pigtail hairstyle and red hair ties from the reference image for my child's head. 5. Core requirement: Ensure 100% similarity of my child's facial features and appearance, with no uncharacteristic changes. The overall style should be a high-definition, warm, nostalgic, patriotic-themed children's portrait.`
   };
   
   return prompts[styleType as keyof typeof prompts] || prompts.flag;

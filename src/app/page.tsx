@@ -7,7 +7,7 @@ import ResultDisplay from '@/components/ResultDisplay';
 import QuotaExceeded from '@/components/QuotaExceeded';
 import { createCompositeImage } from '@/lib/imageComposer';
 import { hasQuotaAvailable, getRemainingQuota, cleanupExpiredQuota, consumeQuota } from '@/lib/quota';
-import { processWithNanobanana, createNanobananaPrompt } from '@/lib/nanobanana';
+import { processImageWithGemini } from '@/lib/gemini';
 
 export default function Home() {
   const [selectedImage, setSelectedImage] = useState<string>('');
@@ -65,27 +65,20 @@ export default function Home() {
     setError('');
 
     try {
-      console.log('开始使用nanobanana专业提示词处理图片:', {
-        styleType,
-        prompt: createNanobananaPrompt(styleType)
-      });
+      console.log('开始使用Gemini 2.5 Flash Image Preview模型处理图片:', { styleType });
       
-      // 调用nanobanana专业AI处理
-      const nanobananaResult = await processWithNanobanana(
-        imageData, 
-        `/templates/${styleType === 'flag' ? 'flag-example.jpg' : 'nostalgic-example.jpg'}`, 
-        styleType
-      );
+      // 调用Gemini API进行图像处理
+      const geminiResult = await processImageWithGemini(imageData, styleType);
       
-      if (nanobananaResult.success && nanobananaResult.data) {
-        console.log('nanobanana处理成功');
-        setResultImage(nanobananaResult.data.processedImageUrl);
-      } else {
-        console.warn('nanobanana处理失败，使用本地合成作为备选:', nanobananaResult.error);
-        
-        // 备选方案：使用本地图像合成
+      if (geminiResult.success && geminiResult.data) {
+        console.log('Gemini处理成功，描述:', geminiResult.data.description);
+        // 注意：Gemini 2.5 Flash Image Preview目前返回的是文本描述，不是实际图片
+        // 这里使用本地合成作为演示
         const compositeImage = await createCompositeImage(imageData, styleType);
         setResultImage(compositeImage);
+      } else {
+        console.error('Gemini处理失败:', geminiResult.error);
+        setError('AI处理失败，请重试');
       }
       
       // 更新剩余额度显示
@@ -153,10 +146,6 @@ export default function Home() {
         
         {/* 上传区域 */}
         <div>
-          <h2 className="text-lg font-semibold text-gray-800 mb-1">上传图片</h2>
-          <p className="text-xs text-orange-600 mb-3">
-            💡 建议使用五官清晰、光线良好的正面照片
-          </p>
           <ImageUpload 
             onImageSelect={handleImageSelect}
             disabled={isProcessing || quotaExceeded}
