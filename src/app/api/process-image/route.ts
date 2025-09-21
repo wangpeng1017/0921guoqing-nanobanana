@@ -33,9 +33,9 @@ export async function POST(request: NextRequest) {
     
     return NextResponse.json({
       success: true,
-      processedImage: result.data.processedImage,
-      description: result.data.description,
-      originalImage: result.data.originalImage
+      processedImage: result.data?.processedImage,
+      description: result.data?.description,
+      originalImage: result.data?.originalImage
     });
     
   } catch (error) {

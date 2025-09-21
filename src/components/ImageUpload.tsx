@@ -18,7 +18,7 @@ export default function ImageUpload({ onImageSelect, disabled = false }: ImageUp
     return new Promise((resolve) => {
       const canvas = document.createElement('canvas');
       const ctx = canvas.getContext('2d')!;
-      const img = new Image();
+      const img = new globalThis.Image();
       
       img.onload = () => {
         // 设置最大尺寸
