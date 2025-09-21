@@ -156,17 +156,23 @@ export default function Home() {
           />
         </div>
 
-        {/* 风格选择区域 - 只在上传图片后显示 */}
-        {selectedImage && !quotaExceeded && (
-          <div>
-            <h2 className="text-lg font-semibold text-gray-800 mb-3">选择风格</h2>
-            <StyleSelector
-              onStyleSelect={handleStyleSelect}
-              selectedStyle={selectedStyle}
-              disabled={isProcessing}
-            />
-          </div>
-        )}
+        {/* 风格预览 - 始终显示 */}
+        <div>
+          <h2 className="text-lg font-semibold text-gray-800 mb-3">
+            {selectedImage ? '选择你喜欢的风格' : '看看能做成什么风格的图片'}
+          </h2>
+          <StyleSelector
+            onStyleSelect={handleStyleSelect}
+            selectedStyle={selectedStyle}
+            disabled={isProcessing || quotaExceeded || !selectedImage}
+          />
+          {!selectedImage && (
+            <p className="text-xs text-gray-500 mt-2 text-center">
+              上传照片后即可选择风格生成
+            </p>
+          )}
+        </div>
+
 
         {/* 结果展示区域 */}
         {(isProcessing || resultImage) && !quotaExceeded && (

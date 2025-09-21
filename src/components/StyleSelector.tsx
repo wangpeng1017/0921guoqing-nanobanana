@@ -1,5 +1,6 @@
 'use client';
 
+import Image from 'next/image';
 import { STYLE_TEMPLATES } from '@/types/styles';
 
 interface StyleSelectorProps {
@@ -34,16 +35,14 @@ export default function StyleSelector({
             onClick={() => handleStyleClick(template.id)}
           >
             {/* 缩略图 */}
-            <div className="relative w-full h-24 bg-gradient-to-br from-blue-200 via-purple-200 to-pink-200">
-              <div className="absolute inset-0 flex items-center justify-center">
-                <div className="text-2xl">
-                  {template.id === 'flag' && '🇨🇳'}
-                  {template.id === 'seaside' && '🌊'}
-                  {template.id === 'forest' && '🌲'}
-                  {template.id === 'playground' && '🎠'}
-                  {template.id === 'space' && '🚀'}
-                </div>
-              </div>
+            <div className="relative w-full h-24 overflow-hidden">
+              <Image
+                src={template.thumbnailUrl}
+                alt={template.name}
+                fill
+                className="object-cover"
+                sizes="(max-width: 768px) 50vw, 25vw"
+              />
               
               {/* 选中状态指示器 */}
               {selectedStyle === template.id && (

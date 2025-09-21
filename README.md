@@ -5,14 +5,16 @@
 ## ✨ 功能特色
 
 - 📸 **智能图片上传**：支持拖拽上传，自动压缩优化
-- 🎭 **多样风格选择**：提供5种精美主题风格
-  - 🇨🇳 红旗飘扬：爱国主题写真
-  - 🌊 海边风情：海滩度假风格
-  - 🌲 森林探险：自然冒险主题
-  - 🎠 游乐场欢乐：童趣游乐风格
-  - 🚀 太空奇遇：科幻探险主题
-- 🤖 **AI图像处理**：集成Google Gemini 2.5 Flash Image Preview
-- 📱 **移动端优化**：响应式设计，完美适配手机端
+- 🎭 **真实示例预览**：上传页面即可看到风格效果图
+  - 🇨🇳 红旗飘扬：与祖国同在的爱国主题写真
+  - 🌊 海边风情：海滩度假风格写真
+  - 🌲 森林探险：自然冒险主题写真
+  - 🎠 游乐场欢乐：童趣游乐风格写真
+  - 🚀 太空奇遇：科幻探险主题写真
+- 🤖 **专业AI处理**：集成nanobanana模型和Gemini AI
+- 💾 **Vercel Blob存储**：高性能云端文件存储
+- 💧 **每日免费额度**：10次/天，也支持付费购买
+- 📱 **极简单页面**：一个页面完成所有操作
 - 💾 **一键保存**：支持保存到本地相册
 - 🔄 **分享功能**：支持社交媒体分享
 
@@ -20,7 +22,8 @@
 
 - **前端框架**：Next.js 15
 - **UI库**：Tailwind CSS
-- **AI模型**：Google Gemini 2.5 Flash Image Preview
+- **AI模型**：nanobanana + Google Gemini 2.5 Flash Image Preview
+- **文件存储**：Vercel Blob Storage
 - **语言**：TypeScript
 - **部署平台**：Vercel
 
@@ -44,6 +47,13 @@ npm install
 ```env
 # Google Gemini API配置
 GEMINI_API_KEY=your_gemini_api_key_here
+
+# Vercel Blob存储配置
+BLOB_READ_WRITE_TOKEN=your_vercel_blob_token_here
+
+# nanobanana API配置
+NANOBANANA_API_KEY=your_nanobanana_api_key_here
+NANOBANANA_API_URL=https://api.nanobanana.ai/v1
 
 # 应用配置
 NEXT_PUBLIC_APP_NAME=AI国庆儿童写真
