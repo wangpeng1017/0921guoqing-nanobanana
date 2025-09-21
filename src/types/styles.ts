@@ -3,7 +3,7 @@ export interface StyleTemplate {
   name: string;
   description: string;
   thumbnailUrl: string;
-  category: 'patriotic' | 'nature' | 'adventure' | 'fantasy';
+  category: 'patriotic' | 'nature' | 'adventure' | 'fantasy' | 'vintage';
 }
 
 export const STYLE_TEMPLATES: StyleTemplate[] = [
@@ -15,31 +15,10 @@ export const STYLE_TEMPLATES: StyleTemplate[] = [
     category: 'patriotic'
   },
   {
-    id: 'seaside',
-    name: '海边风情',
-    description: '在美丽的海边享受阳光沙滩',
-    thumbnailUrl: '/templates/flag-example.jpg',
-    category: 'nature'
-  },
-  {
-    id: 'forest',
-    name: '森林探险',
-    description: '在绿意盎然的森林中探索自然',
-    thumbnailUrl: '/templates/flag-example.jpg',
-    category: 'adventure'
-  },
-  {
-    id: 'playground',
-    name: '游乐场欢乐',
-    description: '在彩色游乐场中尽情玩耖',
-    thumbnailUrl: '/templates/flag-example.jpg',
-    category: 'adventure'
-  },
-  {
-    id: 'space',
-    name: '太空奇遇',
-    description: '在神秘的太空中展开奇妙旅程',
-    thumbnailUrl: '/templates/flag-example.jpg',
-    category: 'fantasy'
+    id: 'nostalgic',
+    name: '怀旧风格',
+    description: '复古怀旧，时光倒流的美好回忆',
+    thumbnailUrl: '/templates/nostalgic-example.jpg',
+    category: 'vintage'
   }
 ];

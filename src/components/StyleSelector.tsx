@@ -35,12 +35,12 @@ export default function StyleSelector({
             onClick={() => handleStyleClick(template.id)}
           >
             {/* 缩略图 */}
-            <div className="relative w-full h-24 overflow-hidden">
+            <div className="relative w-full h-32 overflow-hidden bg-gray-50">
               <Image
                 src={template.thumbnailUrl}
                 alt={template.name}
                 fill
-                className="object-cover"
+                className="object-contain"
                 sizes="(max-width: 768px) 50vw, 25vw"
               />
               

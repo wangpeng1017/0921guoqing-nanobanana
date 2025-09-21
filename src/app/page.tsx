@@ -30,9 +30,18 @@ export default function Home() {
     setError('');
   };
 
-  // 处理风格选择并自动开始生成
-  const handleStyleSelect = async (styleId: string) => {
+  // 处理风格选择
+  const handleStyleSelect = (styleId: string) => {
     setSelectedStyle(styleId);
+    setError('');
+  };
+  
+  // 手动开始生成
+  const handleStartGeneration = async () => {
+    if (!selectedImage || !selectedStyle) {
+      setError('请先上传照片并选择风格');
+      return;
+    }
     
     // 检查额度
     if (!hasQuotaAvailable()) {
@@ -40,9 +49,7 @@ export default function Home() {
       return;
     }
     
-    if (selectedImage && styleId) {
-      await startGeneration(selectedImage, styleId);
-    }
+    await startGeneration(selectedImage, selectedStyle);
   };
 
   // 开始生成图片
@@ -156,22 +163,29 @@ export default function Home() {
           />
         </div>
 
-        {/* 风格预览 - 始终显示 */}
+        {/* 风格选择 - 始终显示 */}
         <div>
           <h2 className="text-lg font-semibold text-gray-800 mb-3">
-            {selectedImage ? '选择你喜欢的风格' : '看看能做成什么风格的图片'}
+            选择你喜欢的风格
           </h2>
           <StyleSelector
             onStyleSelect={handleStyleSelect}
             selectedStyle={selectedStyle}
-            disabled={isProcessing || quotaExceeded || !selectedImage}
+            disabled={isProcessing || quotaExceeded}
           />
-          {!selectedImage && (
-            <p className="text-xs text-gray-500 mt-2 text-center">
-              上传照片后即可选择风格生成
-            </p>
-          )}
         </div>
+        
+        {/* 生成按钮 - 在选择了图片和风格后显示 */}
+        {selectedImage && selectedStyle && !quotaExceeded && !isProcessing && !resultImage && (
+          <div className="text-center">
+            <button
+              onClick={handleStartGeneration}
+              className="px-8 py-3 bg-blue-600 text-white rounded-lg font-medium hover:bg-blue-700 active:scale-95 transition-all duration-200"
+            >
+              开始生成 ✨
+            </button>
+          </div>
+        )}
 
 
         {/* 结果展示区域 */}
