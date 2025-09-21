@@ -5,9 +5,7 @@ import ImageUpload from '@/components/ImageUpload';
 import StyleSelector from '@/components/StyleSelector';
 import ResultDisplay from '@/components/ResultDisplay';
 import QuotaExceeded from '@/components/QuotaExceeded';
-import { createCompositeImage } from '@/lib/imageComposer';
 import { hasQuotaAvailable, getRemainingQuota, cleanupExpiredQuota, consumeQuota } from '@/lib/quota';
-import { processImageWithGemini } from '@/lib/gemini';
 
 export default function Home() {
   const [selectedImage, setSelectedImage] = useState<string>('');
@@ -65,20 +63,37 @@ export default function Home() {
     setError('');
 
     try {
-      console.log('开始使用Gemini 2.5 Flash Image Preview模型处理图片:', { styleType });
+      console.log('开始使用nanobanana API处理图片:', { styleType });
       
-      // 调用Gemini API进行图像处理
-      const geminiResult = await processImageWithGemini(imageData, styleType);
+      // 转换为File对象用于API调用
+      const response = await fetch(imageData);
+      const blob = await response.blob();
+      const file = new File([blob], 'uploaded-image.jpg', { type: 'image/jpeg' });
       
-      if (geminiResult.success && geminiResult.data) {
-        console.log('Gemini处理成功，描述:', geminiResult.data.description);
-        // 注意：Gemini 2.5 Flash Image Preview目前返回的是文本描述，不是实际图片
-        // 这里使用本地合成作为演示
-        const compositeImage = await createCompositeImage(imageData, styleType);
-        setResultImage(compositeImage);
+      // 准备FormData
+      const formData = new FormData();
+      formData.append('image', file);
+      formData.append('style', styleType);
+      
+      // 调用nanobanana API进行实际图像生成
+      const apiResponse = await fetch('/api/nanobanana-process', {
+        method: 'POST',
+        body: formData,
+      });
+      
+      if (!apiResponse.ok) {
+        const errorData = await apiResponse.json();
+        throw new Error(errorData.error || '图像生成失败');
+      }
+      
+      const result = await apiResponse.json();
+      console.log('nanobanana API处理结果:', result);
+      
+      if (result.success && result.data && result.data.processedImage) {
+        setResultImage(result.data.processedImage);
       } else {
-        console.error('Gemini处理失败:', geminiResult.error);
-        setError('AI处理失败，请重试');
+        console.error('nanobanana处理失败:', result.error);
+        setError(result.error || 'AI处理失败，请重试');
       }
       
       // 更新剩余额度显示
