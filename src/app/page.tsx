@@ -175,15 +175,35 @@ export default function Home() {
           />
         </div>
         
-        {/* 生成按钮 - 在选择了图片和风格后显示 */}
-        {selectedImage && selectedStyle && !quotaExceeded && !isProcessing && !resultImage && (
-          <div className="text-center">
+        {/* 生成按钮区域 - 始终显示 */}
+        {!quotaExceeded && !isProcessing && !resultImage && (
+          <div className="text-center space-y-3">
             <button
               onClick={handleStartGeneration}
-              className="px-8 py-3 bg-blue-600 text-white rounded-lg font-medium hover:bg-blue-700 active:scale-95 transition-all duration-200"
+              disabled={!selectedImage || !selectedStyle}
+              className={`px-8 py-3 rounded-lg font-medium transition-all duration-200 ${
+                selectedImage && selectedStyle
+                  ? 'bg-blue-600 text-white hover:bg-blue-700 active:scale-95'
+                  : 'bg-gray-300 text-gray-500 cursor-not-allowed'
+              }`}
             >
               开始生成 ✨
             </button>
+            
+            {/* 提示信息 */}
+            {(!selectedImage || !selectedStyle) && (
+              <div className="text-sm text-gray-600">
+                {!selectedImage && !selectedStyle && (
+                  <p>📸 请先上传照片并选择风格</p>
+                )}
+                {!selectedImage && selectedStyle && (
+                  <p>📸 请先上传孩子的照片</p>
+                )}
+                {selectedImage && !selectedStyle && (
+                  <p>🎨 请选择一个风格</p>
+                )}
+              </div>
+            )}
           </div>
         )}
 
