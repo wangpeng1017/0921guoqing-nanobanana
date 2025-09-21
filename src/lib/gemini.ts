@@ -1,14 +1,4 @@
-import { GoogleGenerativeAI } from '@google/generative-ai';
-
-// 初始化Gemini客户端
-const genAI = new GoogleGenerativeAI(process.env.GEMINI_API_KEY!);
-
-// 获取Gemini 2.5 Flash Image Preview模型（即nanobanana模型）
-export const getGeminiModel = () => {
-  return genAI.getGenerativeModel({ 
-    model: 'gemini-2.5-flash-image-preview'
-  });
-};
+import { apiKeyManager } from './apiKeyManager';
 
 // 处理图像融合的提示词模板
 export const createImageFusionPrompt = (styleType: string) => {
@@ -20,47 +10,81 @@ export const createImageFusionPrompt = (styleType: string) => {
   return prompts[styleType as keyof typeof prompts] || prompts.flag;
 };
 
-// Gemini 2.5 Flash Image Preview图像处理函数（nanobanana模型）
+// Gemini 2.5 Flash Image Preview图像处理函数（使用密钥轮询）
 export async function processImageWithGemini(imageData: string, styleType: string) {
-  try {
-    const model = getGeminiModel();
-    const prompt = createImageFusionPrompt(styleType);
+  const maxRetries = 3;
+  let lastError: Error | null = null;
+  
+  for (let attempt = 1; attempt <= maxRetries; attempt++) {
+    let currentApiKey: string | null = null;
     
-    console.log('使用Gemini 2.5 Flash Image Preview进行图像处理...');
-    
-    // 将base64图像数据转换为模型可接受的格式
-    const imageParts = [{
-      inlineData: {
-        data: imageData.split(',')[1], // 移除data:image/...;base64,前缀
-        mimeType: 'image/jpeg'
+    try {
+      console.log(`🚀 尝试第${attempt}次调用Gemini 2.5 Flash Image Preview...`);
+      
+      // 获取当前可用的API密钥和模型
+      currentApiKey = apiKeyManager.getCurrentApiKey();
+      if (!currentApiKey) {
+        throw new Error('没有可用的API密钥');
       }
-    }];
-    
-    // 调用Gemini 2.5 Flash Image Preview模型
-    const result = await model.generateContent([prompt, ...imageParts]);
-    const response = await result.response;
-    const text = response.text();
-    
-    console.log('Gemini 2.5 Flash Image Preview响应:', text);
-    
-    // 注意：如果Gemini 2.5 Flash Image Preview实际上可以生成图像，
-    // 那么这里应该返回生成的图像数据
-    // 目前作为测试，返回文本描述和原图像
-    
-    return {
-      success: true,
-      data: {
-        originalImage: imageData,
-        description: text,
-        processedImage: imageData, // 如果模型能生成图像，这里应该是生成的图像
-        method: 'gemini-2.5-flash-image-preview'
+      
+      const model = apiKeyManager.getGeminiModel();
+      const prompt = createImageFusionPrompt(styleType);
+      
+      console.log(`🔑 使用密钥: ${currentApiKey.substr(0, 10)}...${currentApiKey.substr(-4)}`);
+      
+      // 将base64图像数据转换为模型可接受的格式
+      const imageParts = [{
+        inlineData: {
+          data: imageData.split(',')[1], // 移除data:image/...;base64,前缀
+          mimeType: 'image/jpeg'
+        }
+      }];
+      
+      // 调用Gemini 2.5 Flash Image Preview模型
+      const result = await model.generateContent([prompt, ...imageParts]);
+      const response = await result.response;
+      const text = response.text();
+      
+      console.log('✅ Gemini 2.5 Flash Image Preview处理成功:', text.substring(0, 100) + '...');
+      
+      // 标记密钥成功
+      apiKeyManager.markKeySuccess(currentApiKey);
+      
+      return {
+        success: true,
+        data: {
+          originalImage: imageData,
+          description: text,
+          processedImage: imageData, // 如果模型能生成图像，这里应该是生成的图像
+          method: 'gemini-2.5-flash-image-preview',
+          usedApiKey: `${currentApiKey.substr(0, 10)}...${currentApiKey.substr(-4)}`
+        }
+      };
+      
+    } catch (error) {
+      lastError = error instanceof Error ? error : new Error('未知错误');
+      
+      console.error(`❌ 第${attempt}次尝试失败:`, lastError.message);
+      
+      // 标记密钥失败
+      if (currentApiKey) {
+        apiKeyManager.markKeyFailed(currentApiKey, lastError);
       }
-    };
-  } catch (error) {
-    console.error('Gemini 2.5 Flash Image Preview API调用失败:', error);
-    return {
-      success: false,
-      error: error instanceof Error ? error.message : '未知错误'
-    };
+      
+      // 如果还有重试机会，等待一秒后重试
+      if (attempt < maxRetries) {
+        console.log(`⏳ 等待${attempt}秒后重试...`);
+        await new Promise(resolve => setTimeout(resolve, attempt * 1000));
+      }
+    }
   }
+  
+  // 所有尝试都失败
+  console.error('❗ 所有重试尝试都失败');
+  console.log('📊 密钥池状态:', apiKeyManager.getKeyPoolStatus());
+  
+  return {
+    success: false,
+    error: lastError?.message || '所有API密钥都不可用'
+  };
 }
